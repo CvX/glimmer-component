@@ -19,6 +19,7 @@ import Component from './component';
 import ComponentDefinition from './component-definition';
 import { RootReference } from './references';
 import { Dict, Destroyable } from "@glimmer/util";
+import { metaFor } from "./tracked";
 
 export interface ConstructorOptions {
   env: Environment;
@@ -112,6 +113,8 @@ export default class ComponentManager implements GlimmerComponentManager<Compone
     let { component } = bucket;
 
     component.args = bucket.namedArgsSnapshot();
+    metaFor(component).dirtyableTagFor('args').inner.dirty();
+    
     component.didUpdate();
   }
 

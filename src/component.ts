@@ -1,5 +1,4 @@
 import { Simple } from '@glimmer/runtime';
-import { tracked } from './tracked';
 
 /**
  * The `Component` class defines an encapsulated UI element that is rendered to
@@ -162,7 +161,7 @@ class Component {
    * ```
    *
    */
-  @tracked args: object;
+  args: object;
 
   static create(injections: any) {
     return new this(injections);

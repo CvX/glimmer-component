@@ -8,7 +8,7 @@ module('Component Arguments');
 
 test('Args smoke test', (assert) => {
   let done = assert.async();
-  assert.expect(5);
+  assert.expect(7);
 
   let parent: ParentComponent;
 
@@ -16,6 +16,7 @@ test('Args smoke test', (assert) => {
     @tracked firstName = "Tom";
     isDank = true;
     daysOfSleepRequiredAfterEmberConf = 4;
+    catNames = ["gorby", "seatac"];
 
     didInsertElement() {
       parent = this;
@@ -31,7 +32,8 @@ test('Args smoke test', (assert) => {
       assert.propEqual(this.args, {
         firstName: "Tom",
         isDank: true,
-        days: 4
+        days: 4,
+        cats: ["gorby", "seatac"]
       });
 
       assert.ok(Object.isFrozen(this.args));
@@ -42,17 +44,21 @@ test('Args smoke test', (assert) => {
       assert.propEqual(this.args, {
         firstName: "Thomas",
         isDank: true,
-        days: 4
+        days: 4,
+        cats: ["gorby", "seatac"]
       });
 
       assert.ok(Object.isFrozen(this.args));
       assert.notStrictEqual(this.args, this.oldArgs);
+    }
 
-      done();
+    @tracked('args')
+    get loudName() {
+      return this.args.firstName + '!!!';
     }
   }
 
-  buildApp()
+  let app = buildApp()
     .component('parent-component', ParentComponent)
     .component('child-component', ChildComponent)
     .template('main', '<div><parent-component /></div>')
@@ -62,10 +68,24 @@ test('Args smoke test', (assert) => {
           some-attr=foo
           @firstName={{firstName}}
           @isDank={{isDank}}
-          @days={{daysOfSleepRequiredAfterEmberConf}} />
+          @days={{daysOfSleepRequiredAfterEmberConf}}
+          @cats={{catNames}} />
       </div>`)
-    .template('child-component', '<div></div>')
+    .template('child-component', `
+      <div>
+        <div id="loud-name">{{loudName}}</div>
+        {{#each @cats key="@index" as |cat|}}
+          {{cat}}
+        {{/each}}
+      </div>`)
     .boot();
 
+  assert.equal(app.rootElement.querySelector('#loud-name').textContent, 'Tom!!!');
+
   parent.firstName = "Thomas";
+
+  setTimeout(() => {
+    assert.equal(app.rootElement.querySelector('#loud-name').textContent, 'Thomas!!!');
+    done();
+  }, 0);
 });
